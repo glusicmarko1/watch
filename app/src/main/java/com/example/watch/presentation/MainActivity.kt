@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -83,6 +84,30 @@ fun ScoreScreen(score: ScoreState, onUndo: () -> Unit) {
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
+        ScalingLazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item { TimeText() }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TeamScore(name = stringResource(R.string.team_a),
+                        sets = score.setsA,
+                        games = score.gamesA,
+                        points = score.pointsA)
+                    TeamScore(name = stringResource(R.string.team_b),
+                        sets = score.setsB,
+                        games = score.gamesB,
+                        points = score.pointsB)
+                }
+            }
+            item {
+                Button(onClick = onUndo) {
+                    Text(stringResource(R.string.undo))
+                }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TimeText()
             Row(
