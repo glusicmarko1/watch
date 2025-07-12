@@ -108,6 +108,23 @@ fun ScoreScreen(score: ScoreState, onUndo: () -> Unit) {
                 Button(onClick = onUndo) {
                     Text(stringResource(R.string.undo))
                 }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            TimeText()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TeamScore(name = stringResource(R.string.team_a),
+                    sets = score.setsA,
+                    games = score.gamesA,
+                    points = score.pointsA)
+                TeamScore(name = stringResource(R.string.team_b),
+                    sets = score.setsB,
+                    games = score.gamesB,
+                    points = score.pointsB)
+            }
+            Button(onClick = onUndo) {
+                Text(stringResource(R.string.undo))
             }
         }
     }
