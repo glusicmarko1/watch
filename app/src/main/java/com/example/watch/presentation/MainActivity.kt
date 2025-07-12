@@ -1,9 +1,9 @@
 package com.example.watch.presentation
-
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.ScalingLazyColumn
+import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
@@ -36,6 +40,47 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent {
+            ScoreApp(
+                score = scoreState,
+                onAddA = { addPointA() },
+                onAddB = { addPointB() },
+                onUndo = { undo() }
+            )
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_STEM_PRIMARY, KeyEvent.KEYCODE_STEM_1 -> {
+                addPointA(); true
+            }
+            KeyEvent.KEYCODE_STEM_2 -> {
+                addPointB(); true
+            }
+            else -> super.onKeyDown(keyCode, event)
+        }
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_STEM_PRIMARY,
+            KeyEvent.KEYCODE_STEM_1,
+            KeyEvent.KEYCODE_STEM_2 -> true
+            else -> super.onKeyUp(keyCode, event)
+        }
+    }
+
+    private fun addPointA() {
+        history.add(scoreState)
+        scoreState = scoreState.addPointToA()
+    }
+
+    private fun addPointB() {
+        history.add(scoreState)
+        scoreState = scoreState.addPointToB()
+    }
+
         setContent { ScoreApp(scoreState, onUndo = { undo() }) }
     }
 
@@ -69,6 +114,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun ScoreApp(
+    score: ScoreState,
+    onAddA: () -> Unit,
+    onAddB: () -> Unit,
+    onUndo: () -> Unit
+) {
+    WatchTheme {
+        ScoreScreen(score = score, onAddA = onAddA, onAddB = onAddB, onUndo = onUndo)
 fun ScoreApp(score: ScoreState, onUndo: () -> Unit) {
     WatchTheme {
         ScoreScreen(score = score, onUndo = onUndo)
@@ -76,6 +129,54 @@ fun ScoreApp(score: ScoreState, onUndo: () -> Unit) {
 }
 
 @Composable
+fun ScoreScreen(
+    score: ScoreState,
+    onAddA: () -> Unit,
+    onAddB: () -> Unit,
+    onUndo: () -> Unit
+) {
+    ScalingLazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item { TimeText() }
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TeamScore(
+                    name = stringResource(R.string.team_a),
+                    sets = score.setsA,
+                    games = score.gamesA,
+                    points = score.pointsA
+                )
+                TeamScore(
+                    name = stringResource(R.string.team_b),
+                    sets = score.setsB,
+                    games = score.gamesB,
+                    points = score.pointsB
+                )
+            }
+        }
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = onAddA) { Text("➕ A") }
+                Button(onClick = onAddB) { Text("➕ B") }
+            }
+        }
+        item {
+            Button(
+                onClick = onUndo,
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
 fun ScoreScreen(score: ScoreState, onUndo: () -> Unit) {
     Box(
         modifier = Modifier
@@ -132,16 +233,36 @@ fun ScoreScreen(score: ScoreState, onUndo: () -> Unit) {
 
 @Composable
 fun TeamScore(name: String, sets: Int, games: Int, points: Int) {
+    androidx.compose.foundation.layout.Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+        Text(name, style = MaterialTheme.typography.title2)
+        Text(
+            "S:$sets  G:$games  P:${pointsToString(points)}",
+            style = MaterialTheme.typography.body2
+        )
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(name)
         Text(stringResource(R.string.sets) + " $sets")
         Text(stringResource(R.string.games) + " $games")
         Text(stringResource(R.string.points) + " ${pointsToString(points)}")
+
     }
 }
 
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
+    ScoreApp(
+        score = ScoreState(pointsA = 2, pointsB = 3, gamesA = 4, gamesB = 2, setsA = 1, setsB = 1),
+        onAddA = {},
+        onAddB = {},
+        onUndo = {}
+    )
+
     ScoreApp(ScoreState(), onUndo = {})
+
 }
