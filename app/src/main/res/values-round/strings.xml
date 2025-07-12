@@ -1,3 +1,9 @@
 <resources>
     <string name="hello_world">From the Round world,\nHello, %1$s!</string>
+    <string name="team_a">Team A</string>
+    <string name="team_b">Team B</string>
+    <string name="undo">Undo</string>
+    <string name="sets">Sets:</string>
+    <string name="games">Games:</string>
+    <string name="points">Points:</string>
 </resources>
